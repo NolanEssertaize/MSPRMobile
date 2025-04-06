@@ -41,59 +41,85 @@ const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ navigation }) => {
     },
   });
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const requestPermissions = async () => {
+    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+    const { status: libraryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
-    if (status !== 'granted') {
+    if (cameraStatus !== 'granted' || libraryStatus !== 'granted') {
       Alert.alert(
-        'Permission refusée',
-        'Nous avons besoin de votre permission pour accéder à votre galerie.'
+        'Permissions requises',
+        'Nous avons besoin d\'accéder à votre caméra et à votre galerie pour ajouter une photo de plante.',
+        [{ text: 'OK' }]
       );
-      return;
+      return false;
     }
+    return true;
+  };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.7,
-    });
+  const pickImage = async () => {
+    const hasPermissions = await requestPermissions();
+    if (!hasPermissions) return;
+    
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.7,
+      });
 
-    if (!result.canceled) {
-      setPhoto(result.assets[0]);
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setPhoto(result.assets[0]);
+      }
+    } catch (err) {
+      setError('Erreur lors de la sélection de l\'image');
+      console.error(err);
     }
   };
 
   const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    const hasPermissions = await requestPermissions();
+    if (!hasPermissions) return;
     
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission refusée',
-        'Nous avons besoin de votre permission pour accéder à votre appareil photo.'
-      );
-      return;
-    }
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.7,
+      });
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.7,
-    });
-
-    if (!result.canceled) {
-      setPhoto(result.assets[0]);
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setPhoto(result.assets[0]);
+      }
+    } catch (err) {
+      setError('Erreur lors de la capture de l\'image');
+      console.error(err);
     }
   };
 
   const onSubmit = async (data: PlantCreate) => {
+    if (!photo) {
+      setError('Veuillez ajouter une photo de votre plante');
+      return;
+    }
+
     setIsLoading(true);
     try {
       await createPlant({
         ...data,
         photo: photo,
       });
-      navigation.navigate('PlantList');
+      
+      Alert.alert(
+        'Succès',
+        'Votre plante a été ajoutée avec succès !',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('PlantList')
+          }
+        ]
+      );
     } catch (err) {
       console.error('Failed to create plant:', err);
       setError('Impossible de créer la plante. Veuillez réessayer.');
@@ -101,6 +127,10 @@ const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ navigation }) => {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -160,8 +190,6 @@ const AddPlantScreen: React.FC<AddPlantScreenProps> = ({ navigation }) => {
       >
         Ajouter la plante
       </Button>
-
-      {isLoading && <Loading />}
 
       <Snackbar
         visible={!!error}

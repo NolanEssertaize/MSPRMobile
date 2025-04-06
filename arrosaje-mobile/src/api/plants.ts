@@ -1,8 +1,59 @@
-import api from './api.ts';
-import { Plant, PlantCreate, PlantUpdate } from '../types/plant';
+// src/api/plants.ts - Version corrigée
 
-// Obtenir toutes les plantes de l'utilisateur
-export const getUserPlants = async (): Promise<Plant[]> => {
+import api from './api';
+import { Platform } from 'react-native';
+import { PlantCreate, PlantUpdate } from '../types/plant';
+
+export const createPlant = async (plantData: PlantCreate): Promise<any> => {
+  try {
+    // Créer un objet FormData pour la photo uniquement
+    const formData = new FormData();
+    
+    // Ajouter la photo si elle existe
+    if (plantData.photo) {
+      const photoFile = {
+        uri: plantData.photo.uri,
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+      };
+      
+      // @ts-ignore - TypeScript ne reconnaît pas bien le type pour FormData dans React Native
+      formData.append('photo', photoFile);
+    }
+    
+    // Construire l'URL avec les paramètres de requête
+    let url = `/plants/?name=${encodeURIComponent(plantData.name)}&location=${encodeURIComponent(plantData.location)}`;
+    
+    // Ajouter care_instructions comme paramètre de requête si présent
+    if (plantData.care_instructions) {
+      url += `&care_instructions=${encodeURIComponent(plantData.care_instructions)}`;
+    }
+    
+    console.log('Sending request to URL:', url);
+    
+    // Envoyer la requête avec les paramètres dans l'URL
+    const response = await api.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Create plant error:', error);
+    
+    // Journalisation détaillée de l'erreur pour le débogage
+    if (error.response) {
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+    }
+    
+    throw error;
+  }
+};
+
+// Fonction pour récupérer les plantes de l'utilisateur
+export const getUserPlants = async (): Promise<any[]> => {
   try {
     const response = await api.get('/my_plants/');
     return response.data;
@@ -12,8 +63,8 @@ export const getUserPlants = async (): Promise<Plant[]> => {
   }
 };
 
-// Obtenir toutes les plantes sauf celles de l'utilisateur
-export const getAllOtherPlants = async (): Promise<Plant[]> => {
+// Fonction pour récupérer toutes les plantes sauf celles de l'utilisateur
+export const getAllOtherPlants = async (): Promise<any[]> => {
   try {
     const response = await api.get('/all_plants/');
     return response.data;
@@ -23,77 +74,62 @@ export const getAllOtherPlants = async (): Promise<Plant[]> => {
   }
 };
 
-// Créer une nouvelle plante
-export const createPlant = async (plantData: PlantCreate) => {
+// src/api/plants.ts - Fonction updatePlant corrigée
+
+export const updatePlant = async (plantId: number, plantData: PlantUpdate): Promise<any> => {
   try {
+    // Créer un objet FormData pour la photo uniquement
     const formData = new FormData();
-    formData.append('name', plantData.name);
-    formData.append('location', plantData.location);
-
-    if (plantData.care_instructions) {
-      formData.append('care_instructions', plantData.care_instructions);
-    }
-
+    
+    // Ajouter la photo si elle existe
     if (plantData.photo) {
-      const photoName = plantData.photo.uri.split('/').pop();
-      const mimeType = 'image/jpeg'; // Vous pouvez détecter le type MIME si nécessaire
-
-      formData.append('photo', {
+      const photoFile = {
         uri: plantData.photo.uri,
-        name: photoName,
-        type: mimeType,
-      } as any);
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+      };
+      
+      // @ts-ignore
+      formData.append('photo', photoFile);
     }
-
-    const response = await api.post('/plants/', formData, {
+    
+    // Construire l'URL avec les paramètres de requête
+    let url = `/plants/${plantId}?`;
+    
+    // Ajouter les paramètres de requête seulement s'ils sont présents
+    const params = [];
+    if (plantData.name) params.push(`name=${encodeURIComponent(plantData.name)}`);
+    if (plantData.location) params.push(`location=${encodeURIComponent(plantData.location)}`);
+    if (plantData.care_instructions) params.push(`care_instructions=${encodeURIComponent(plantData.care_instructions)}`);
+    if (plantData.in_care_id) params.push(`in_care_id=${plantData.in_care_id}`);
+    
+    url += params.join('&');
+    
+    console.log('Sending update request to URL:', url);
+    
+    // Envoyer la requête avec les paramètres dans l'URL
+    const response = await api.put(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-
-    return response.data;
-  } catch (error) {
-    console.error('Create plant error:', error);
-    throw error;
-  }
-};
-
-// Mettre à jour une plante
-export const updatePlant = async (plantId: number, plantData: PlantUpdate) => {
-  try {
-    const formData = new FormData();
-
-    if (plantData.name) formData.append('name', plantData.name);
-    if (plantData.location) formData.append('location', plantData.location);
-    if (plantData.care_instructions) formData.append('care_instructions', plantData.care_instructions);
-    if (plantData.in_care_id) formData.append('in_care_id', plantData.in_care_id.toString());
-
-    if (plantData.photo) {
-      const photoName = plantData.photo.uri.split('/').pop();
-      const mimeType = 'image/jpeg';
-
-      formData.append('photo', {
-        uri: plantData.photo.uri,
-        name: photoName,
-        type: mimeType,
-      } as any);
-    }
-
-    const response = await api.put(`/plants/${plantId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
+    
     return response.data;
   } catch (error) {
     console.error('Update plant error:', error);
+    
+    // Journalisation détaillée de l'erreur pour le débogage
+    if (error.response) {
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+    }
+    
     throw error;
   }
 };
 
-// Supprimer une plante
-export const deletePlant = async (plantId: number) => {
+// Fonction pour supprimer une plante
+export const deletePlant = async (plantId: number): Promise<any> => {
   try {
     const response = await api.delete(`/plants?plant_id=${plantId}`);
     return response.data;
@@ -103,8 +139,8 @@ export const deletePlant = async (plantId: number) => {
   }
 };
 
-// Commencer à prendre soin d'une plante
-export const startPlantCare = async (plantId: number) => {
+// Fonction pour commencer à prendre soin d'une plante
+export const startPlantCare = async (plantId: number): Promise<any> => {
   try {
     const response = await api.put(`/plants/${plantId}/start-care`);
     return response.data;
@@ -114,8 +150,8 @@ export const startPlantCare = async (plantId: number) => {
   }
 };
 
-// Arrêter de prendre soin d'une plante
-export const endPlantCare = async (plantId: number) => {
+// Fonction pour arrêter de prendre soin d'une plante
+export const endPlantCare = async (plantId: number): Promise<any> => {
   try {
     const response = await api.put(`/plants/${plantId}/end-care`);
     return response.data;
@@ -125,8 +161,8 @@ export const endPlantCare = async (plantId: number) => {
   }
 };
 
-// Obtenir les demandes de soins
-export const getCareRequests = async () => {
+// Fonction pour récupérer les demandes de soins
+export const getCareRequests = async (): Promise<any[]> => {
   try {
     const response = await api.get('/care-requests/');
     return response.data;
