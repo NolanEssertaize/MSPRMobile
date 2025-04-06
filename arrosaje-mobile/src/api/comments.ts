@@ -15,7 +15,11 @@ export const getPlantComments = async (plantId: number): Promise<Comment[]> => {
 // Créer un commentaire
 export const createComment = async (commentData: CommentCreate) => {
   try {
-    const response = await api.post('/comments/', commentData);
+    // Convert commentData to query parameters
+    const url = `/comments/?plant_id=${commentData.plant_id}&comment=${encodeURIComponent(commentData.comment)}`;
+    
+    // Send a POST request with empty body but parameters in URL
+    const response = await api.post(url);
     return response.data;
   } catch (error) {
     console.error('Create comment error:', error);

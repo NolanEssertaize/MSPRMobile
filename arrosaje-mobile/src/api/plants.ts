@@ -164,7 +164,7 @@ export const endPlantCare = async (plantId: number): Promise<any> => {
 // Fonction pour récupérer les demandes de soins
 export const getCareRequests = async (): Promise<any[]> => {
   try {
-    const response = await api.get('/care-requests/');
+    const response = await api.get('/all_plants/');
     return response.data;
   } catch (error) {
     console.error('Get care requests error:', error);

@@ -36,8 +36,8 @@ const CareRequestsScreen: React.FC<CareRequestsScreenProps> = ({ navigation }) =
       }
       
       // Récupérer les plantes dont l'utilisateur prend soin
-      const userPlants = await getUserPlants();
-      const carePlants = userPlants.filter(plant => plant.in_care && plant.plant_sitting === user?.id);
+      const userPlants = await getCareRequests();
+      const carePlants = userPlants.filter(plant => plant.in_care_id === user?.id);
       setMyCarePlants(carePlants);
       
       if (viewMode === 'myCare') {
@@ -66,9 +66,8 @@ const CareRequestsScreen: React.FC<CareRequestsScreenProps> = ({ navigation }) =
 
   useEffect(() => {
     if (viewMode === 'all') {
-      handleSearch(searchQuery); // Réappliquer la recherche sur toutes les plantes
+      handleSearch(searchQuery); 
     } else {
-      // Mode "Mes Soins"
       if (searchQuery.trim() === '') {
         setFilteredPlants(myCarePlants);
       } else {
