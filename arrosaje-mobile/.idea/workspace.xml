@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ae28c72c-3a37-46f5-9416-8d6b8972e33b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/__tests__/Api/comments.test.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/__tests__/Api/plants.test.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/__tests__/Auth/Auth.test.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/__tests__/Auth/Login.test.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/__tests__/Auth/Register.test.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/api.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
