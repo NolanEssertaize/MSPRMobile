@@ -1,0 +1,45 @@
+name: Tests Automatisés Arrosaje
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v3
+      
+    - name: Configuration de Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Installation des dépendances
+      run: npm ci
+      
+    - name: Exécution des tests unitaires
+      run: npm test
+      
+    - name: Vérification des types TypeScript
+      run: npm run typecheck
+      # Assurez-vous d'avoir un script "typecheck" dans votre package.json
+      # par exemple: "typecheck": "tsc --noEmit"
+      
+    - name: Vérification du linting (optionnel)
+      run: npm run lint
+      # Assurez-vous d'avoir un script "lint" dans votre package.json
+      # par exemple: "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+      
+    - name: Génération du rapport de couverture de code
+      run: npm test -- --coverage
+      
+    - name: Téléchargement du rapport de couverture
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
