@@ -4,8 +4,8 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 // Utiliser l'URL correcte pour votre environnement de développement
-const API_URL = 'http://10.0.2.2:8000';  // Pour l'émulateur Android
-// const API_URL = 'http://localhost:8000';  // Pour iOS simulator
+//const API_URL = 'http://10.0.2.2:8000';  // Pour l'émulateur Android
+const API_URL = 'http://192.168.43.81:8000';  // Pour iOS simulator
 // const API_URL = 'http://votre-ip:8000';  // Pour un appareil physique
 
 const api = axios.create({
